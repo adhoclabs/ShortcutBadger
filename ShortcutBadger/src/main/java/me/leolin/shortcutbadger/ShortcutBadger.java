@@ -23,6 +23,8 @@ public final class ShortcutBadger {
 
     private static final List<Class<? extends Badger>> BADGERS = new LinkedList<Class<? extends Badger>>();
 
+    private static int badgeCount = 0;
+
     static {
         BADGERS.add(AdwHomeBadger.class);
         BADGERS.add(ApexHomeBadger.class);
@@ -55,6 +57,18 @@ public final class ShortcutBadger {
         }
     }
 
+    public static boolean incrementCount(Context context) {
+      ShortcutBadger.badgeCount += 1;
+
+      try {
+        applyCountOrThrow(context, badgeCount);
+        return true;
+      } catch (ShortcutBadgeException e) {
+        Log.e(LOG_TAG, "Unable to execute badge:" + e.getMessage());
+        return false;
+      }
+    }
+
     /**
      * Tries to update the notification count, throw a {@link ShortcutBadgeException} if it fails
      * @param context Caller context
@@ -63,6 +77,8 @@ public final class ShortcutBadger {
     public static void applyCountOrThrow(Context context, int badgeCount) throws ShortcutBadgeException {
         if (sShortcutBadger == null)
             initBadger(context);
+
+        ShortcutBadger.badgeCount = badgeCount;
 
         try {
             sShortcutBadger.executeBadge(context, sComponentName, badgeCount);
